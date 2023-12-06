@@ -1,0 +1,19 @@
+Welcome to an overview of the documentation provided by the Rust project.
+
+This page contains links to various helpful references, 
+
+most of which are available offline (if opened with rustup doc). 
+
+Many of these resources take the form of “books”;
+
+we collectively call these “The Rust Bookshelf.”
+
+Some are large, some are small.
+
+All of these books are managed by the Rust Organization,
+
+but other unofficial documentation resources are included here as well!
+
+If you’re just looking for the standard library reference, 
+
+here it is: Rust API documentation
