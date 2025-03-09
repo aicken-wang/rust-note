@@ -16,7 +16,7 @@ let a = 10u32;
 |16-bit|i16|u16|
 |32-bit|i32|u32|
 |64-bit|i64|u64|
-|128-bit|i128|u126|
+|128-bit|i128|u128|
 |CPU arch|isize|usize|
 - isize/usize和CPU架构有关，32位就是i32/u32,64位就是i64/u64
 
@@ -415,6 +415,152 @@ fn  main() {
   - fn关键字
   - 形参与实参
   - 栈帧
+```rust
+// fn 用于封装和代码复用
+// cargo run
+// add 函数的定义 fn add(a: i32, b: i32) -> i32，函数签名中的 -> i32 表示函数的返回值类型为 i32
+// add 函数的调用 add(a, b)，函数调用时的参数 a1 和 b1 称为实参
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+fn main() {
+    let a1 = 10;
+    let b1 = 20;
+    let result = add(a1, b1);
+    println!("{} + {} = {}", a1, b1, result); // 10 + 20 = 30
+}
+```
 - 闭包
-  - 保存上下文变量的函数，两个竖线符合 `||`
+  - 保存变量的函数，两个竖线符合 `||`
+    - 闭包是函数中包含局部变量，而函数不捕获局部变量
+```rust
+// 函数定义
+fn add_1(a: i32) -> i32 {
+    a + 1
+}
+fn main() {
+    // 闭包函数定义
+    // 闭包函数的定义使用 | 参数列表 | -> 返回值类型 { 函数体 }
+    // 闭包函数的定义中，参数列表和返回值类型都是可选的
+    let incr_v0 = |x: i32| -> i32 { x + 1 };
+    // 省略类型标注
+    let incr_v1 = |x| {x + 1}; // 定义在函数内部，根据上下文环境能分析出类型
+    // 省略{}花括号
+    let incr_v2 = |x| x + 1;
+
+    let a = 10;
+    let b = add_1(1); // 1 + 1 = 2
+    let c = incr_v0(1); // 1 + 1 = 2
+    let d = incr_v1(1); // 1 + 1 = 2
+    let e = incr_v2(1); // 1 + 1 = 2
+    println!("{} + 1 = {}", a, b);
+    println!("{} + 1 = {}", 1, c);
+    println!("{} + 1 = {}", 1, d);
+    println!("{} + 1 = {}", 1, e);
+}
+```
+```rust
+fn closure_demo() {
+    let a = 10;
+    // panic
+    fn add(x: i32) -> i32 {
+        x + a // can't capture dynamic environment in a fn item
+    } // 函数
+
+    let add_1 = |x: i32| -> i32 { x + a }; // 闭包可以访问外部变量,函数不可以
+    let result = add(1);
+    let result_1 = add_1(1);
+    println!("result: {}, result_1: {}", result, result_1);
+}
+```
 - 模块
+```rust
+// main.rs
+mod utils; // 导入utils模块
+// 路径引用方式
+use my_module::my_add; // 绝对路径 函数名
+use self::my_module::my_sub_module; // 相对路径  模块名::函数名
+use crate::utils::math::add; // crate根路径
+// 模块别名
+use my_module::my_add as my_add_alias;
+// 普通模块
+mod my_module {
+    // 公开函数
+    pub fn my_add() {
+        println!(" public function my_add in my_module");
+    }
+    // 私有函数
+    fn my_sub() {
+        println!(" private function my_sub in my_module");
+    }
+    //嵌套模块
+    pub mod my_sub_module {
+        // 公开函数
+        pub fn version() {
+            println!(" public function version in my_sub_module");
+        }
+        // 私有函数
+        fn internal() {
+            println!(" private function internal in my_sub_module");
+        }
+    }
+}
+fn main() {
+    //my_module::my_add(); // 调用模块中的公开函数
+    my_add();// 绝对路径调用
+    my_add_alias(); // 模块别名调用
+    // my_module::my_sub(); // 编译报错 私有函数不能被调用
+    //my_module::my_sub_module::version(); // 调用嵌套模块中的公开函数
+    my_sub_module::version(); // 相对路径调用
+    //my_module::my_sub_module::internal(); // 编译报错 私有函数不能被调用
+    println!("3 + 3 = {}", utils::add(2, 3)); // 调用utils模块中的add函数, 3 + 3 = 6
+    println!("3 - 3 = {}", utils::math::sub(2, 3)); // 调用utils模块中的math模块中的sub函数, 3 - 3 = 0
+    println!("3 * 3 = {}", utils::mul(2, 3)); // 调用utils模块中的mul函数, 3 * 3 = 9
+    println!("3 / 3 = {}", utils::div(3, 3)); // 调用utils模块中的div函数, 3 / 3 = 1
+}
+
+
+```
+  - 在src/目录下创建utils
+  - math.rs 子模块文件
+```rust
+// cd src/utils
+// vim math.rs
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+// 模块级别的函数, 当前模块(crate)可见
+pub(crate) fn sub(a: i32, b: i32) -> i32 {
+    a - b
+}
+pub fn mul(a: i32, b: i32) -> i32 {
+    a * b
+}
+pub fn div(a: i32, b: i32) -> i32 {
+    a / b
+}
+
+```
+- `mod.rs`模块入口文件
+```rust
+// cd src/utils
+// vim mod.rs
+// 声明子模块并导出
+pub mod math;
+// 选择性导出
+pub use math::{add, div, mul};
+
+```
+- 模块权限和引用方式
+- pub:公开可见
+- pub(crate):当前crate可见
+- 无修饰符:默认模块内私有
+```rust
+// 路径引用方式
+use my_module::my_add; // 绝对路径 函数名
+use self::my_module::my_sub_module; // 相对路径  模块名::函数名
+use crate::utils::math::add; // crate 根路径
+// 模块别名
+use my_module::my_add as my_add_alias;
+
+```
