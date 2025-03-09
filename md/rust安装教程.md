@@ -1,7 +1,35 @@
 # Rust 学习
 ### Rust安装
+# 设置代理
+- Linux or MacOS
+- Windows添加环境变量
 ```bash
-export RUSTUP_HOME=/opt/rust-toolchain # 设置工具链存储路径，需要安装前配置
+# linux 
+vim ${HOME}/.bash.rc
+# 添加到最后
+export RUST_HOME=/opt/rust-toolchain # 安装前配置，设置工具链存储的路径
+export CARGO_HOME=$RUST_HOME 
+# 设置代理 避免被GFW，国内加速
+export RUSTUP_DIST_SERVER=https://rsproxy.cn
+export RUSTUP_UPDATE_ROOT=https://rsproxy.cn/rustup
+source ${HOME}/.bashrc
+echo ${CARGO_HOME}
+```
+
+```bash
+
+# 安装到/opt/rust目录下,linux下普通用户为username是wang的用户添加权限
+# wang默认在/opt/rust没有权限，通过acl工具添加权限，也可以简单粗暴 sudo chown -R wang.wang /opt/rust
+sudo apt install acl
+useradd wang
+# 将wang添加到root组
+sudo usermod -aG root wang
+# 查看wang是否在root组内
+groups wang
+# 为wang添加读写执行权限
+setfacl -m u:wang:rwx /opt/rust
+# 更多用法man setfacl 查看
+# MacOS直接安装到$HOME
 ```
 - MacOS or Linux
 ```bash
@@ -41,11 +69,6 @@ rustup toolchain list # 查看所有已安装的版本
 
 rustup show # 查看当前Rust工具链及组件
 rustup uninstall 1.58.0 # 卸载工具链
-
-export RUST_HOME=/opt/rust-toolchain # 安装前配置，设置工具链存储的路径
-# 设置代理 避免被GWF，国内加速
-export RUSTUP_DIST_SERVER=https://rsproxy.cn
-export RUSTUP_UPDATE_ROOT=https://rsproxy.cn/rustup
 
 # 交叉编译到musl环境
 # rustup target add x86_64-unknown-linux-musl # 若没有安装的需要先安装Linux静态编译目标
